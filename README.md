@@ -36,11 +36,10 @@ npm install --save crowdnode@v1
 ## CrowdNode Browser SDK
 
 ```html
-<script src="https://unpkg.com/@root/request@1.x/urequest.js"></script>
-<script src="https://unpkg.com/dashsight@1.x/dashrequest.js"></script>
+<script src="https://unpkg.com/dashtx@0.9/dashtx.js"></script>
+<script src="https://unpkg.com/dashkeys@1.x/dashkeys.js"></script>
 <script src="https://unpkg.com/dashsight@1.x/dashsight.js"></script>
 <script src="https://unpkg.com/dashsight@1.x/dashsocket.js"></script>
-<script src="https://unpkg.com/@dashevo/dashcore-lib@0.19.x"></script>
 <script src="https://unpkg.com/crowdnode@1.x/dashapi.js"></script>
 <script src="https://unpkg.com/crowdnode@1.x/crowdnode.js"></script>
 ```
@@ -124,7 +123,7 @@ APIs, but which you could learn from in [crowdnode-cli](/bin/crowdnode.js).
 
 ```js
 CrowdNode.offset = 20000;
-CrowdNode.duffs = 100000000;
+CrowdNode.satoshis = 100000000;
 CrowdNode.depositMinimum = 100000;
 
 CrowdNode.requests = {
@@ -188,8 +187,8 @@ await CrowdNode.accept(wif, hotwallet);
  * }
  */
 
-// amount given in DUFFs
-await CrowdNode.deposit(wif, hotwallet, (amount = 0));
+// satoshis (a.k.a. duffs) is the base unit of DASH
+await CrowdNode.deposit(wif, hotwallet, (satoshis = 0));
 /** @type SocketPayment
  * {
  *   "address": "Xj00000000000000000000000000000000",
@@ -282,7 +281,7 @@ await CrowdNode.http.VotingOpen(pub);
 | Term          | Description                                                   |
 | ------------- | ------------------------------------------------------------- |
 | addr          | your Dash address (Base58Check-encoded Pay-to-PubKey Address) |
-| amount        | the integer value of "Duffs" (Đ/100000000)                    |
+| satoshis      | the base unit of DASH (a.k.a. "Duffs") Đ/100000000            |
 | permil        | 1/1000, 1‰, or 0.1% - between 1 and 1000 (0.1% to 100.0%)     |
 | ./privkey.wif | the file path to your staking key in WIF (Base58Check) format |
 

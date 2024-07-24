@@ -67,7 +67,7 @@
  * @typedef {Object} InsightSocketEventData
  * @property {String} txid - hex
  * @property {Number} valueOut - float
- * @property {Array<Record<Base58CheckAddr, Number>>} vout - addr and duffs
+ * @property {Array<Record<Base58CheckAddr, Number>>} vout - addr and satoshis
  * @property {Boolean} isRBF
  * @property {Boolean} txlock
  *

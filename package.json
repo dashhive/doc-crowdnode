@@ -4,8 +4,11 @@
   "description": "Manage your stake in Đash with the CrowdNode Blockchain API",
   "main": "./index.js",
   "browser": {
-    "./lib/request.js": "./lib/request-browser.js",
-    "./lib/dashcore.js": "./lib/browser-dashcore.js"
+    "index.js": "crowdnode.js",
+    "./lib/dashcore.js": "./lib/browser-dashcore.js",
+    "./lib/request.js": "./shims/request-browser.js",
+    "./shims/crypto-node.js": "./shims/crypto-browser.js",
+    "crypto": false
   },
   "bin": {
     "crowdnode": "./bin/crowdnode.js"
@@ -39,11 +42,14 @@
   },
   "homepage": "https://github.com/dashhive/crowdnode.js#readme",
   "dependencies": {
-    "@dashevo/dashcore-lib": "^0.19.41",
+    "@dashincubator/base58check": "^1.3.1",
+    "@dashincubator/blocktx": "^0.9.0-2",
+    "@dashincubator/ripemd160": "^2.3.0",
+    "@dashincubator/secp256k1": "^1.7.1-1",
     "dashsight": "^1.3.0-0"
   },
   "optionalDependencies": {
-    "@root/request": "^1.9.1",
+    "@root/request": "^1.9.2",
     "dotenv": "^16.0.1",
     "qrcode-svg": "^1.1.0",
     "tough-cookie": "^4.0.0",
