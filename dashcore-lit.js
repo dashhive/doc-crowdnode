@@ -5,20 +5,23 @@
   //@ts-ignore
   exports.dashcore = Dashcore;
 
-  let Base58Check = require("@dashincubator/base58check").Base58Check;
   //@ts-ignore
-  let BlockTx = exports.BlockTx || require("@dashincubator/blocktx");
+  let Base58Check = exports.Base58Check || require("@dashincubator/base58check").Base58Check;
+  //@ts-ignore
+  let DashTx = exports.DashTx || require("dashtx");
   //@ts-ignore
   let Crypto = exports.crypto || require("./shims/crypto-node.js");
-  let RIPEMD160 = require("@dashincubator/ripemd160");
-  let Secp256k1 = require("@dashincubator/secp256k1");
+  //@ts-ignore
+  let RIPEMD160 = exports.RIPEMD160 || require("@dashincubator/ripemd160");
+  //@ts-ignore
+  let Secp256k1 = exports.Secp256k1 || require("@dashincubator/secp256k1");
 
   let b58c = Base58Check.create({
     pubKeyHashVersion: "4c",
     privateKeyVersion: "cc",
   });
 
-  let dashTx = BlockTx.create({
+  let dashTx = DashTx.create({
     version: 3,
     /**
      * @param {String} addr
@@ -43,7 +46,7 @@
   }
   Dashcore.Transaction = Transaction;
 
-  // 193 + BlockTx.OUTPUT_SIZE;
+  // 193 + DashTx.OUTPUT_SIZE;
   Transaction.DUST_AMOUNT = 5460;
 
   Transaction.create = function () {
@@ -53,11 +56,11 @@
       /** @type {Array<CoreUtxo>} */
       inputs: [],
       locktime: 0,
-      /** @type {Array<import('@dashincubator/blocktx').TxOutput>} */
+      /** @type {Array<import('dashtx').TxOutput>} */
       outputs: [],
       version: 3,
     };
-    /** @type {import('@dashincubator/blocktx').TxInfoSigned} */
+    /** @type {import('dashtx').TxInfoSigned} */
     let txSigned;
 
     let coreTx = {};
@@ -74,7 +77,7 @@
     };
 
     /**
-     * @param {Array<import('@dashincubator/blocktx').TxOutput>} payments
+     * @param {Array<import('dashtx').TxOutput>} payments
      * @param {Number} satoshis - base unit of DASH (a.k.a. "duffs")
      */
     coreTx.to = function (payments, satoshis) {
@@ -121,6 +124,7 @@
       if (changeOutput) {
         _txInfo.outputs.push(changeOutput);
       }
+      // @ts-ignore
       let _keys = await coreTx._mapKeysToUtxos(_txInfo, keys);
       console.log(_keys.length, _txInfo.inputs.length);
       txSigned = await dashTx.hashAndSignAll(_txInfo, _keys);
@@ -134,7 +138,7 @@
         return total + payment.satoshis;
       }, 0);
 
-      let [minFee, maxFee] = BlockTx.estimates(txInfo);
+      let [minFee, maxFee] = DashTx.estimates(txInfo);
       let feeSpread = maxFee - minFee;
       let halfSpread = Math.ceil(feeSpread / 2);
       if (!fee) {
@@ -142,7 +146,7 @@
       }
       if (fee < minFee) {
         throw new Error(
-          `your fees are too powerful: increase fee to at least ${minFee} (absolute possible minimum) + ${halfSpread} (to account for possible byte padding) + ${BlockTx.OUTPUT_SIZE} (if you expect change back)`,
+          `your fees are too powerful: increase fee to at least ${minFee} (absolute possible minimum) + ${halfSpread} (to account for possible byte padding) + ${DashTx.OUTPUT_SIZE} (if you expect change back)`,
         );
       }
 
@@ -153,7 +157,7 @@
       }
 
       let changeFee = 0;
-      /** @type {import('@dashincubator/blocktx').TxOutput?} */
+      /** @type {import('dashtx').TxOutput?} */
       let changeOutput = null;
       if (change) {
         if (!changeAddr) {
@@ -162,7 +166,7 @@
             `you must provide 'change(addr)' to collect '${change}' sats or increase 'fee' to '${bigFee}'`,
           );
         }
-        changeFee = BlockTx.OUTPUT_SIZE;
+        changeFee = DashTx.OUTPUT_SIZE;
         change -= changeFee;
         changeOutput = {
           address: changeAddr,
@@ -182,7 +186,7 @@
     };
 
     /**
-     * @param {import('@dashincubator/blocktx').TxInfo} _txInfo
+     * @param {import('dashtx').TxInfo} _txInfo
      * @param {Array<String|Uint8Array|ArrayBuffer|Buffer>} keys
      */
     coreTx._mapKeysToUtxos = async function (_txInfo, keys) {
@@ -308,7 +312,7 @@
     };
 
     pk.toPublicKey = function () {
-      let pubBuf = BlockTx.utils.toPublicKey(privBuf);
+      let pubBuf = DashTx.utils.toPublicKey(privBuf);
       let pub = PublicKeyFactory.create(pubBuf);
       return pub;
     };
@@ -341,7 +345,7 @@
 
     if ("string" === typeof wifHexOrBuf) {
       if (64 === wifHexOrBuf.length) {
-        return BlockTx.utils.hexToU8(wifHexOrBuf);
+        return DashTx.utils.hexToU8(wifHexOrBuf);
       }
       if (52 === wifHexOrBuf.length) {
         return wifToPrivateKey(wifHexOrBuf);
@@ -413,7 +417,7 @@
   PublicKeyFactory.from = function (hexOrBuf) {
     if ("string" === typeof hexOrBuf) {
       if (64 === hexOrBuf.length) {
-        return BlockTx.utils.hexToU8(hexOrBuf);
+        return DashTx.utils.hexToU8(hexOrBuf);
       }
       throw new Error("cannot create public key from non-hex strings");
     }
@@ -440,7 +444,7 @@
     let shaU8 = new Uint8Array(sha);
     let ripemd = RIPEMD160.create();
     let hash = ripemd.update(shaU8);
-    let pkh = hash.digest("hex");
+    let pkh = hash.digest();
     // extra .toString() for tsc
     return pkh.toString();
   }
@@ -450,7 +454,7 @@
    * @returns {Promise<String>} wif - Base58Check-encoded private key
    */
   async function privateKeyToWif(privBuf) {
-    let privHex = BlockTx.utils.u8ToHex(privBuf);
+    let privHex = DashTx.utils.u8ToHex(privBuf);
     let decoded = {
       privateKey: privHex,
     };
